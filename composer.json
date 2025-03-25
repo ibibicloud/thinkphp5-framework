@@ -1,0 +1,19 @@
+{
+    "name": "ibibicloud/thinkphp5-framework",
+    "keywords": ["thinkphp5","framework","thinkphp5-framework"],
+    "description": "基于thinkphp-framework=v5.1.42框架核心类库",
+    "license": "Apache-2.0",
+    "require": {
+        "php": ">=5.6.0",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-curl": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "think\\": "src/think/"
+        },
+        "file": [
+        ]
+    }
+}
