@@ -35,10 +35,8 @@ class Curl
     // 构造函数，初始化curl资源句柄并设置一些默认选项，包括https相关设置
     public function __construct()
     {
-        $this->ch = curl_init();
-        if ( !$this->ch ) {
-            // 如果curl初始化失败，抛出异常
-            throw new \Exception('Failed to initialize cURL');
+        if ( !is_resource($this->ch) ) {
+            $this->ch = curl_init();
         }
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         $this->setVerifySSL();
@@ -102,6 +100,9 @@ class Curl
     // 执行请求并返回响应结果
 	public function execute()
 	{
+        if ( empty($this->url) ) {
+            throw new \Exception('URL is not set.');
+        }
 	    $response = curl_exec($this->ch);
 	    if ( $response === false ) {
 	        // 如果curl_exec执行失败，抛出异常并包含错误信息

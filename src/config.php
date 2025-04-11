@@ -116,13 +116,13 @@ return [
 
     // Session设置
     'session'    => [
-        'id'             => '',         // session_id
-        'var_session_id' => '',         // SESSION_ID的提交变量,解决flash上传跨域
-        'prefix'         => 'xyg',      // SESSION 前缀
-        'type'           => '',         // 驱动方式 支持redis memcache memcached
-        'auto_start'     => true,       // 是否自动开启SESSION
-        'httponly'       => true,       // 是否使用httponly
-        'secure'         => false,      // 是否安全选项
+        'id'             => '',             // session_id
+        'var_session_id' => '',             // SESSION_ID的提交变量,解决flash上传跨域
+        'prefix'         => 'ibibicloud',   // SESSION 前缀
+        'type'           => '',             // 驱动方式 支持redis memcache memcached
+        'auto_start'     => true,           // 是否自动开启SESSION
+        'httponly'       => true,           // 是否使用httponly
+        'secure'         => false,          // 是否安全选项
     ],
 
     // Cookie设置

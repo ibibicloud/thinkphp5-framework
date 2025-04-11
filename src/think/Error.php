@@ -2,7 +2,6 @@
 
 namespace think;
 
-use think\console\Output as ConsoleOutput;
 use think\exception\ErrorException;
 use think\exception\Handle;
 use think\exception\ThrowableError;
@@ -40,12 +39,7 @@ class Error
         }
 
         self::getExceptionHandler()->report($e);
-
-        if (PHP_SAPI == 'cli') {
-            self::getExceptionHandler()->renderForConsole(new ConsoleOutput, $e);
-        } else {
-            self::getExceptionHandler()->render($e)->send();
-        }
+        self::getExceptionHandler()->render($e)->send();
     }
 
     /**

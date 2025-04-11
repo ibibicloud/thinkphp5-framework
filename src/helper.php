@@ -9,14 +9,10 @@ use think\facade\Cache;
 use think\facade\Config;
 use think\facade\Cookie;
 use think\facade\Debug;
-use think\facade\Log;
 use think\facade\Request;
-use think\facade\Route;
 use think\facade\Session;
-use think\facade\Validate;
 use think\facade\Url;
 use think\Response;
-use think\route\RuleItem;
 use think\facade\Curl;
 
 /**
@@ -131,6 +127,33 @@ function cookie($name, $value = '', $option = null)
 }
 
 /**
+ * Session管理
+ * @param string|array  $name session名称，如果为数组表示进行session设置
+ * @param mixed         $value session值
+ * @param string        $prefix 前缀
+ * @return mixed
+ */
+function session($name, $value = '', $prefix = null)
+{
+    if ( is_array($name) ) {
+        // 初始化
+        Session::init($name);
+    } elseif ( is_null($name) ) {
+        // 清除
+        Session::clear($value);
+    } elseif ( '' === $value ) {
+        // 判断或获取
+        return 0 === strpos($name, '?') ? Session::has(substr($name, 1), $prefix) : Session::get($name, $prefix);
+    } elseif ( is_null($value) ) {
+        // 删除
+        return Session::delete($name, $prefix);
+    } else {
+        // 设置
+        return Session::set($name, $value, $prefix);
+    }
+}
+
+/**
  * 实例化数据库类
  * @param string        $name 操作的数据表名称（不含前缀）
  * @param array|string  $config 数据库配置参数
@@ -159,16 +182,20 @@ function debug($start, $end = '', $dec = 6)
 }
 
 /**
- * 获取\think\response\Download对象实例
- * @param string  $filename 要下载的文件
- * @param string  $name 显示文件名
- * @param bool    $content 是否为内容
- * @param integer $expire 有效期（秒）
- * @return \think\response\Download
+ * 计算磁盘占用空间
+ * @param  integer  $size   大小
+ * @param  integer  $dec    小数位
+ * @return string
  */
-function download($filename, $name = '', $content = false, $expire = 360, $openinBrowser = false)
+function disk_usage($size, $dec = 2)
 {
-    return Response::create($filename, 'download')->name($name)->isContent($content)->expire($expire)->openinBrowser($openinBrowser);
+    $a    = ['B', 'KB', 'MB', 'GB', 'TB'];
+    $pos  = 0;
+    while ($size >= 1024) {
+        $size /= 1024;
+        $pos++;
+    }
+    return round($size, $dec) . " " . $a[$pos];
 }
 
 /**
@@ -184,35 +211,38 @@ function dump($var, $echo = true, $label = null)
 }
 
 /**
- * 获取输入数据 支持默认值和过滤
- * @param string    $key 获取的变量名
- * @param mixed     $default 默认值
- * @param string    $filter 过滤方法
- * @return mixed
+ * 获取当前Request对象实例
+ * @return Request
  */
-function input($key = '', $default = null, $filter = '')
+function request()
 {
-    if ( 0 === strpos($key, '?') ) {
-        $key = substr($key, 1);
-        $has = true;
-    }
-    if ( $pos = strpos($key, '.') ) {
-        // 指定参数来源
-        $method = substr($key, 0, $pos);
-        if ( in_array($method, ['get', 'post', 'put', 'patch', 'delete', 'route', 'param', 'request', 'session', 'cookie', 'server', 'env', 'path', 'file']) ) {
-            $key = substr($key, $pos + 1);
-        } else {
-            $method = 'param';
-        }
-    } else {
-        // 默认为自动判断
-        $method = 'param';
-    }
-    if ( isset($has) ) {
-        return request()->has($key, $method, $default);
-    } else {
-        return request()->$method($key, $default, $filter);
-    }
+    return app('request');
+}
+
+/**
+ * 创建普通 Response 对象实例
+ * @param mixed      $data   输出数据
+ * @param int|string $code   状态码
+ * @param array      $header 头信息
+ * @param string     $type
+ * @return Response
+ */
+function response($data = '', $code = 200, $header = [], $type = 'html')
+{
+    return Response::create($data, $type, $code, $header);
+}
+
+/**
+ * 获取\think\response\Download对象实例
+ * @param string  $filename 要下载的文件
+ * @param string  $name 显示文件名
+ * @param bool    $content 是否为内容
+ * @param integer $expire 有效期（秒）
+ * @return \think\response\Download
+ */
+function download($filename, $name = '', $content = false, $expire = 360, $openinBrowser = false)
+{
+    return Response::create($filename, 'download')->name($name)->isContent($content)->expire($expire)->openinBrowser($openinBrowser);
 }
 
 /**
@@ -242,18 +272,6 @@ function jsonp($data = [], $code = 200, $header = [], $options = [])
 }
 
 /**
- * 实例化Model
- * @param string    $name Model名称
- * @param string    $layer 业务层名称
- * @param bool      $appendSuffix 是否添加类名后缀
- * @return \think\Model
- */
-function model($name = '', $layer = 'model', $appendSuffix = false)
-{
-    return app()->model($name, $layer, $appendSuffix);
-}
-
-/**
  * 获取\think\response\Redirect对象实例
  * @param mixed         $url 重定向地址 支持Url::build方法的地址
  * @param array|integer $params 额外参数
@@ -270,52 +288,28 @@ function redirect($url = [], $params = [], $code = 302)
 }
 
 /**
- * 获取当前Request对象实例
- * @return Request
+ * 获取\think\response\Xml对象实例
+ * @param mixed   $data    返回的数据
+ * @param integer $code    状态码
+ * @param array   $header  头部
+ * @param array   $options 参数
+ * @return \think\response\Xml
  */
-function request()
+function xml($data = [], $code = 200, $header = [], $options = [])
 {
-    return app('request');
+    return Response::create($data, 'xml', $code, $header, $options);
 }
 
 /**
- * 创建普通 Response 对象实例
- * @param mixed      $data   输出数据
- * @param int|string $code   状态码
- * @param array      $header 头信息
- * @param string     $type
- * @return Response
+ * 实例化Model
+ * @param string    $name Model名称
+ * @param string    $layer 业务层名称
+ * @param bool      $appendSuffix 是否添加类名后缀
+ * @return \think\Model
  */
-function response($data = '', $code = 200, $header = [], $type = 'html')
+function model($name = '', $layer = 'model', $appendSuffix = false)
 {
-    return Response::create($data, $type, $code, $header);
-}
-
-/**
- * Session管理
- * @param string|array  $name session名称，如果为数组表示进行session设置
- * @param mixed         $value session值
- * @param string        $prefix 前缀
- * @return mixed
- */
-function session($name, $value = '', $prefix = null)
-{
-    if ( is_array($name) ) {
-        // 初始化
-        Session::init($name);
-    } elseif ( is_null($name) ) {
-        // 清除
-        Session::clear($value);
-    } elseif ( '' === $value ) {
-        // 判断或获取
-        return 0 === strpos($name, '?') ? Session::has(substr($name, 1), $prefix) : Session::get($name, $prefix);
-    } elseif ( is_null($value) ) {
-        // 删除
-        return Session::delete($name, $prefix);
-    } else {
-        // 设置
-        return Session::set($name, $value, $prefix);
-    }
+    return app()->model($name, $layer, $appendSuffix);
 }
 
 /**
@@ -358,27 +352,14 @@ function widget($name, $data = [])
     return $result;
 }
 
-/**
- * 获取\think\response\Xml对象实例
- * @param mixed   $data    返回的数据
- * @param integer $code    状态码
- * @param array   $header  头部
- * @param array   $options 参数
- * @return \think\response\Xml
- */
-function xml($data = [], $code = 200, $header = [], $options = [])
-{
-    return Response::create($data, 'xml', $code, $header, $options);
-}
-
 function curl($url, $header = [], $postData = [], $responseHeader = false, $followLocation = false, $verifySSL = false, $timeout = 10)
 {
     Curl::setUrl($url);
-    $header ? Curl::setHeader($header) : null;
-    $postData ? Curl::setPostData($postData) : null;
-    $responseHeader ? Curl::setResponseHeader($responseHeader) : null;
-    $followLocation ? Curl::setFollowLocation($followLocation) : null;
-    $verifySSL ? Curl::setVerifySSL($verifySSL) : null;
-    $timeout !== 10 ? Curl::setTimeout($timeout) : null;
+    $header && Curl::setHeader($header);
+    $postData && Curl::setPostData($postData);
+    $responseHeader && Curl::setResponseHeader($responseHeader);
+    $followLocation && Curl::setFollowLocation($followLocation);
+    $verifySSL && Curl::setVerifySSL($verifySSL);
+    ( $timeout !== 10 ) && Curl::setTimeout($timeout);
     return Curl::execute();
 }

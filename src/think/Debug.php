@@ -118,15 +118,8 @@ class Debug
         }
 
         $size = $this->mem['mem'][$end] - $this->mem['mem'][$start];
-        $a    = ['B', 'KB', 'MB', 'GB', 'TB'];
-        $pos  = 0;
 
-        while ($size >= 1024) {
-            $size /= 1024;
-            $pos++;
-        }
-
-        return round($size, $dec) . " " . $a[$pos];
+        return disk_usage($size, $dec);
     }
 
     /**
@@ -138,15 +131,8 @@ class Debug
     public function getUseMem($dec = 2)
     {
         $size = memory_get_usage() - $this->app->getBeginMem();
-        $a    = ['B', 'KB', 'MB', 'GB', 'TB'];
-        $pos  = 0;
 
-        while ($size >= 1024) {
-            $size /= 1024;
-            $pos++;
-        }
-
-        return round($size, $dec) . " " . $a[$pos];
+        return disk_usage($size, $dec);
     }
 
     /**
@@ -164,15 +150,8 @@ class Debug
         }
 
         $size = $this->mem['peak'][$end] - $this->mem['peak'][$start];
-        $a    = ['B', 'KB', 'MB', 'GB', 'TB'];
-        $pos  = 0;
 
-        while ($size >= 1024) {
-            $size /= 1024;
-            $pos++;
-        }
-
-        return round($size, $dec) . " " . $a[$pos];
+        return disk_usage($size, $dec);
     }
 
     /**
