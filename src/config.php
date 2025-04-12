@@ -65,13 +65,10 @@ return [
         'route_cache_option'     => [],                 // 路由缓存的设置
 
         // 异常及错误设置
-        // 默认跳转页面对应的模板文件
-        'dispatch_success_tmpl'  => __DIR__ . '/tpl/dispatch_jump.tpl',
-        'dispatch_error_tmpl'    => __DIR__ . '/tpl/dispatch_jump.tpl',
         // 异常页面的模板文件
         'exception_tmpl'         => __DIR__ . '/tpl/think_exception.tpl',
         // 错误显示信息,非调试模式有效
-        'error_message'          => '页面错误！请稍后再试～',
+        'error_message'          => '500 - Internal Server Error',
         // 显示错误信息
         'show_error_msg'         => false,
         // 异常处理handle类 留空使用 \think\exception\Handle
@@ -104,7 +101,7 @@ return [
     // Trace设置 开启 app_trace 后 有效
     'trace'      => [
         'type' => 'Html',   // 内置Html Console 支持扩展
-        'file' => __DIR__ . '/tpl/page_trace.tpl',
+        'file' => __DIR__ . '/tpl/trace.tpl',
     ],
 
     // 缓存设置
@@ -170,6 +167,7 @@ return [
 
     // 中间件配置
     'middleware' => [
+        // 默认命名空间
         'default_namespace' => 'app\\http\\middleware\\',
     ],
 

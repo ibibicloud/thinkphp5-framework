@@ -6,25 +6,6 @@ use think\exception\ClassNotFoundException;
 
 class Loader
 {
-    // 获取应用根目录
-    public static function getRootPath()
-    {
-        if ('cli' == PHP_SAPI) {
-            $scriptName = realpath($_SERVER['argv'][0]);
-        } else {
-            $scriptName = $_SERVER['SCRIPT_FILENAME'];
-        }
-
-        $path = realpath(dirname($scriptName));
-
-        // 删除根目录的think文件
-        // if (!is_file($path . DIRECTORY_SEPARATOR . 'think')) {
-        //     $path = dirname($path);
-        // }
-
-        return $path . DIRECTORY_SEPARATOR;
-    }
-
     /**
      * 字符串命名风格转换
      * type 0 将Java风格转换为C的风格 1 将C风格转换为Java的风格

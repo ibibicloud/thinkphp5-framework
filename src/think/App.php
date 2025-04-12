@@ -788,7 +788,7 @@ class App extends Container
     public function getAppPath()
     {
         if (is_null($this->appPath)) {
-            $this->appPath = Loader::getRootPath() . 'app' . DIRECTORY_SEPARATOR;
+            $this->appPath = $this->getRootPath() . 'app' . DIRECTORY_SEPARATOR;
         }
 
         return $this->appPath;
