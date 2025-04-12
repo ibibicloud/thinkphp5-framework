@@ -49,6 +49,10 @@ return [
         'request_cache'          => false,              // 是否开启请求缓存 true自动缓存 支持设置请求缓存规则
         'request_cache_expire'   => null,               // 请求缓存有效期
         'request_cache_except'   => [],                 // 全局请求缓存排除规则
+        'http_exception_template'=> [                   // 定义40x错误的模板文件路径
+            403 => __DIR__ . '/tpl/403.tpl',
+            404 => __DIR__ . '/tpl/404.tpl',
+        ],
 
         // 路由设置
         'pathinfo_depr'          => '/',                // pathinfo分隔符
