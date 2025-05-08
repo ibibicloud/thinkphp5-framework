@@ -11,26 +11,11 @@ class Curl
     // 请求的URL
     private $url;
 
-    // 请求头信息
-    private $header = [];
-
-    // POST数据（如果是POST请求）
-    private $postData = [];
-
     // 是否返回响应头信息（默认不返回）
     private $responseHeader = false;
 
-    // 是否允许重定向的设置（默认不允许重定向）
-    private $followLocation = false;
-
     // 重定向最大次数
     private $maxRedirs = 3;
-
-    // 是否验证SSL证书（默认不验证）
-    private $verifySSL = false;
-
-	// 请求的超时时间（默认10秒）
-    private $timeout = 10;
 
     // 构造函数，初始化curl资源句柄并设置一些默认选项，包括https相关设置
     public function __construct()
@@ -52,16 +37,19 @@ class Curl
     // 设置请求头信息
     public function setHeader($header)
     {
-        $this->header = $header;
-        curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->header);
+        curl_setopt($this->ch, CURLOPT_HTTPHEADER, $header);
     }
 
     // 设置POST数据（用于POST请求）
     public function setPostData($postData)
     {
-        $this->postData = $postData;
-        curl_setopt($this->ch, CURLOPT_POST, true);
-        curl_setopt($this->ch, CURLOPT_POSTFIELDS, $postData);
+        if ( $postData ) {
+            curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, 'POST');
+            curl_setopt($this->ch, CURLOPT_POSTFIELDS, $postData);
+        } else {
+            curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, 'GET');
+            curl_setopt($this->ch, CURLOPT_POSTFIELDS, '');
+        }
     }
 
     // 设置是否返回响应头信息
@@ -74,7 +62,6 @@ class Curl
     // 设置是否允许重定向
     public function setFollowLocation($followLocation = false)
     {
-        $this->followLocation = $followLocation;
         curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, (bool)$followLocation);
         if ( (bool)$followLocation ) {
         	curl_setopt($this->ch, CURLOPT_MAXREDIRS, $this->maxRedirs);
@@ -84,17 +71,14 @@ class Curl
 	// 设置是否验证SSL证书
 	public function setVerifySSL($verifySSL = false)
 	{
-	    $this->verifySSL = $verifySSL;
-	    // 设置验证SSL证书
-	    curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, $this->verifySSL);
-	    curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, $this->verifySSL);
+	    curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, (bool)$verifySSL);
+	    curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, (bool)$verifySSL);
 	}
 
     // 设置请求超时时间
     public function setTimeout($timeout = 10)
     {
-        $this->timeout = $timeout;
-        curl_setopt($this->ch, CURLOPT_TIMEOUT, $this->timeout);
+        curl_setopt($this->ch, CURLOPT_TIMEOUT, $timeout);
     }
 
     // 执行请求并返回响应结果

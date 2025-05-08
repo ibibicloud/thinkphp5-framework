@@ -352,14 +352,14 @@ function widget($name, $data = [])
     return $result;
 }
 
-function curl($url, $header = [], $postData = [], $responseHeader = false, $followLocation = false, $verifySSL = false, $timeout = 10)
+function curl($url, $header = [], $postData = '', $responseHeader = false, $followLocation = false, $verifySSL = false, $timeout = 10)
 {
     Curl::setUrl($url);
-    $header && Curl::setHeader($header);
-    $postData && Curl::setPostData($postData);
-    $responseHeader && Curl::setResponseHeader($responseHeader);
-    $followLocation && Curl::setFollowLocation($followLocation);
-    $verifySSL && Curl::setVerifySSL($verifySSL);
-    ( $timeout !== 10 ) && Curl::setTimeout($timeout);
+    Curl::setHeader($header);
+    Curl::setPostData($postData);
+    Curl::setResponseHeader($responseHeader);
+    Curl::setFollowLocation($followLocation);
+    Curl::setVerifySSL($verifySSL);
+    Curl::setTimeout($timeout);
     return Curl::execute();
 }
